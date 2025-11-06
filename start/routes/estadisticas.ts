@@ -7,6 +7,7 @@ router
     router.get('/masVendidos', [EstadisticasController, 'masVendidos'])
     router.get('/tallasMayorSalida', [EstadisticasController, 'tallasMayorSalida'])
     router.get('/menosVendidos', [EstadisticasController, 'menosVendidos'])
+    router.post('/descuentoBajaRotacion', [EstadisticasController, 'descuentoBajaRotacion'])
   })
-  .use([middleware.jwt()])
+  //.use([middleware.jwt()])
   .prefix('/estadisticas')
