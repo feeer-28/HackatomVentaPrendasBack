@@ -151,6 +151,7 @@ Departamento → Municipio → Sucursal
 ### Autenticación
 ```http
 POST   /auth/login          # Login de usuario
+POST   /auth/register       # Registrar nuevo usuario
 POST   /auth/logout         # Cerrar sesión
 GET    /auth/me             # Usuario actual
 ```
@@ -190,6 +191,27 @@ GET    /estadisticas/descuentoBajaRotacion    # Descuentos sugeridos
 GET    /facturacion/obtener             # Lista de facturas
 GET    /facturacion/obtenerPorId/:id    # Factura por ID
 POST   /facturacion/crear               # Crear factura
+```
+
+### Sucursales
+```http
+GET    /sucursal/obtener                # Lista de sucursales
+GET    /sucursal/obtenerPorId/:id       # Sucursal por ID
+POST   /sucursal/crear                  # Crear sucursal
+PUT    /sucursal/actualizar/:id         # Actualizar sucursal
+DELETE /sucursal/eliminar/:id           # Eliminar sucursal
+```
+
+### Usuarios
+```http
+GET    /usuarios/obtener                # Lista de usuarios
+GET    /usuarios/obtenerPorId/:id       # Usuario por ID
+PUT    /usuarios/actualizar/:id         # Actualizar usuario
+```
+
+### Municipios
+```http
+GET    /municipios/obtener              # Lista de municipios
 ```
 
 ### Importación
@@ -270,22 +292,27 @@ Request → CORS → JWT Auth → Controller → Response
 ## 🔮 Roadmap y Desarrollo Futuro
 
 ### ✅ Implementado
-- [x] Sistema de autenticación JWT
+- [x] Sistema de autenticación JWT completo
 - [x] CRUD de inventario y productos
+- [x] CRUD de sucursales (crear, leer, actualizar, eliminar)
+- [x] CRUD de usuarios (registro, obtener, actualizar)
 - [x] Analytics de ventas y productos
-- [x] Facturación básica
-- [x] Importación de datos
-- [x] Relaciones entre entidades
+- [x] Facturación completa con detalles
+- [x] Importación masiva de datos (productos, inventario, ventas)
+- [x] Relaciones entre entidades con preloads
+- [x] Gestión de categorías y subcategorías
+- [x] Gestión de municipios y departamentos
+- [x] Middleware JWT para protección de rutas
+- [x] Validaciones de datos (email, contraseñas)
+- [x] Sistema de roles (administrador, empleado)
 
 ### 🚧 En Desarrollo
 - [ ] **Multi-Tenant**: Soporte para múltiples empresas
   - Middleware de tenant
   - Aislamiento de datos por tenant
   - Configuración por tenant
-- [ ] CRUD de sucursales
-- [ ] CRUD de clientes
-- [ ] Gestión de usuarios y roles
-- [ ] Reportes avanzados (PDF/Excel)
+- [ ] Reportes avanzados exportables (PDF/Excel)
+- [ ] Sistema de permisos granular por rol
 
 ### 📋 Planificado
 - [ ] **Multi-Tenant Avanzado**:
