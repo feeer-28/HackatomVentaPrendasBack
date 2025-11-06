@@ -143,30 +143,10 @@ export default class ImportProductosService {
           continue
         }
 
-        // Upsert producto por nombre (puedes cambiar a SKU si lo agregan)
+        // Estrategia: no crear duplicados; SIEMPRE gestionar inventario (crear/actualizar) si hay stock e idsucursal
         const existing = await Producto.query({ client: trx }).where('nombre', nombre!).first()
-        if (existing) {
-          existing.merge({ idsubcategoria: subcat.id, nombre, marca: marca ?? existing.marca, precio, talla: talla ?? existing.talla, descripcion: descripcion ?? existing.descripcion })
-          await existing.save()
-          updated++
-          ops.push({ row: rowIndex, action: 'update_product', idproducto: existing.id })
-
-          // Inventario opcional por idsucursal
-          if (idsucursal && stock !== null) {
-            const inv = await Inventario.query({ client: trx })
-              .where('idproducto', existing.id)
-              .andWhere('idsucursal', idsucursal)
-              .first()
-            if (inv) {
-              inv.merge({ stock })
-              await inv.save()
-              ops.push({ row: rowIndex, action: 'update_inventory', idproducto: existing.id, idsucursal, stock })
-            } else {
-              await Inventario.create({ idproducto: existing.id, idsucursal, stock }, { client: trx })
-              ops.push({ row: rowIndex, action: 'create_inventory', idproducto: existing.id, idsucursal, stock })
-            }
-          }
-        } else {
+        let idProductoUsado: number
+        if (!existing) {
           const nuevo = await Producto.create(
             {
               idsubcategoria: subcat.id,
@@ -180,11 +160,16 @@ export default class ImportProductosService {
           )
           inserted++
           ops.push({ row: rowIndex, action: 'create_product', idproducto: nuevo.id })
+          idProductoUsado = nuevo.id
+        } else {
+          // Producto ya existe: usar su id sin modificarlo
+          idProductoUsado = existing.id
+        }
 
-          if (idsucursal && stock !== null) {
-            await Inventario.create({ idproducto: nuevo.id, idsucursal, stock }, { client: trx })
-            ops.push({ row: rowIndex, action: 'create_inventory', idproducto: nuevo.id, idsucursal, stock })
-          }
+        // Inventario: SIEMPRE crear un nuevo registro si se provee stock e idsucursal
+        if (idsucursal && stock !== null) {
+          await Inventario.create({ idproducto: idProductoUsado, idsucursal, stock }, { client: trx })
+          ops.push({ row: rowIndex, action: 'create_inventory', idproducto: idProductoUsado, idsucursal, stock })
         }
       }
 
@@ -197,22 +182,25 @@ export default class ImportProductosService {
         ops,
       }
 
-      // Guardar log
-      const [log] = await trx
-        .insertQuery()
-        .table('import_logs')
-        .returning(['id'])
-        .insert({
-          user_id: null,
-          file_name: file.clientName,
-          rows_total: rows.length,
-          rows_ok: inserted + updated,
-          rows_error: details.length,
-          details: JSON.stringify(details),
-        })
-
       await trx.commit()
-      return { ...resultado, log_id: log.id }
+
+      let logId: number | undefined
+      try {
+        const [log] = await Database.insertQuery()
+          .table('import_logs')
+          .returning(['id'])
+          .insert({
+            user_id: null,
+            file_name: file.clientName,
+            rows_total: rows.length,
+            rows_ok: inserted + updated,
+            rows_error: details.length,
+            details: JSON.stringify(details),
+          })
+        logId = log?.id
+      } catch {}
+
+      return logId ? { ...resultado, log_id: logId } : resultado
     } catch (error) {
       await trx.rollback()
       throw error
