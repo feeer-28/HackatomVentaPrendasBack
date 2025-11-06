@@ -1,4 +1,5 @@
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
 const InventarioController = () => import('#controllers/InventarioController')
 
 router
@@ -9,4 +10,5 @@ router
     router.put('/actualizar/:id', [InventarioController, 'actualizar'])
     router.delete('/eliminar/:id', [InventarioController, 'eliminar'])
   })
+  .use([middleware.jwt()])
   .prefix('/inventario')

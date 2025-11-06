@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Usuario from '#models/usuario'
+import jwt from 'jsonwebtoken'
 
 export default class AuthController {
   async register({ request, response }: HttpContext) {
@@ -74,8 +75,16 @@ export default class AuthController {
       return response.unauthorized({ message: 'Credenciales inválidas' })
     }
 
+    const secret = process.env.JWT_SECRET
+    if (!secret) {
+      return response.internalServerError({ message: 'JWT_SECRET no configurado' })
+    }
+    const payload = { id: user.id, email: user.email, rol: (user as any).rol }
+    const expiresIn = process.env.JWT_EXPIRES || '1h'
+    const token = jwt.sign(payload, secret, { expiresIn })
+
     const { password: _, ...safe } = user.$attributes as any
-    return response.ok({ message: 'Inicio de sesión exitoso', usuario: safe })
+    return response.ok({ message: 'Inicio de sesión exitoso', token, expiresIn, usuario: safe })
   }
 
   async logout({ response }: HttpContext) {
