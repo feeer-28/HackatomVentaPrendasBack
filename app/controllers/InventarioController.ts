@@ -10,6 +10,8 @@ export default class InventarioController {
 
   async obtener({ response }: HttpContext) {
     const inventarios = await Inventario.query()
+      .preload('producto')
+      .preload('sucursal')
     return response.ok(inventarios)
   }
 
