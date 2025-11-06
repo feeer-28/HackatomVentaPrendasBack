@@ -34,4 +34,20 @@ export default class InventarioController {
     await item.delete()
     return response.ok({ message: 'Eliminado' })
   }
+
+  async eliminarProductoDeInventario({ request, response }: HttpContext) {
+    const { idproducto, idsucursal } = request.only(['idproducto', 'idsucursal'])
+    if (!idproducto || !idsucursal) {
+      return response.badRequest({ message: 'idproducto e idsucursal son requeridos' })
+    }
+    const item = await Inventario.query()
+      .where('idproducto', idproducto)
+      .andWhere('idsucursal', idsucursal)
+      .first()
+    if (!item) {
+      return response.notFound({ message: 'Inventario no encontrado para el producto y sucursal dados' })
+    }
+    await item.delete()
+    return response.ok({ message: 'Eliminado', id: item.id })
+  }
 }

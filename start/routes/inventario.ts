@@ -9,6 +9,7 @@ router
     router.get('/obtenerPorId/:id', [InventarioController, 'obtenerPorId'])
     router.put('/actualizar/:id', [InventarioController, 'actualizar'])
     router.delete('/eliminar/:id', [InventarioController, 'eliminar'])
+    router.post('/eliminarProducto', [InventarioController, 'eliminarProductoDeInventario'])
   })
   //.use([middleware.jwt()])
   .prefix('/inventario')
