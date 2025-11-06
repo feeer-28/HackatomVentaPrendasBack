@@ -1,6 +1,6 @@
 // start/routes/producto.ts
 import router from '@adonisjs/core/services/router'
-import { middleware } from '#start/kernel'
+//import { middleware } from '#start/kernel'
 const ProductoController = () => import('#controllers/ProductoController')
 
 router
@@ -11,5 +11,5 @@ router
     router.put('/actualizar/:id', [ProductoController, 'actualizar'])
     router.delete('/eliminar/:id', [ProductoController, 'eliminar'])
   })
-  .use([middleware.jwt()])
+  //.use([middleware.jwt()])
   .prefix('/productos')

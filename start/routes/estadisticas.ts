@@ -9,5 +9,5 @@ router
     router.get('/menosVendidos', [EstadisticasController, 'menosVendidos'])
     router.post('/descuentoBajaRotacion', [EstadisticasController, 'descuentoBajaRotacion'])
   })
-  //.use([middleware.jwt()])
+  .use([middleware.jwt()])
   .prefix('/estadisticas')
